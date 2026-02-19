@@ -3,24 +3,27 @@
 ## Base URL
 `https://api.imprettyamazing.com`
 
+## General
+All endpoints use JSON (`Content-Type: application/json`) except `POST /profile/avatar` and `POST /profile/cover` (multipart form data).
+
 ## Authentication
 All endpoints (except login/register) require session cookies from login.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/auth/login` | Login with `{"email", "password"}`. Sets `access_token` and `refresh_token` cookies. |
-| POST | `/auth/register` | Create account |
+| POST | `/auth/login` | `{"email": "...", "password": "..."}`. Sets `access_token` and `refresh_token` cookies. |
+| POST | `/auth/register` | `{"email": "...", "password": "...", "username": "..."}`. Username: letters, numbers, hyphens, 3-30 chars. |
 | GET | `/auth/me` | Get current user info |
-| POST | `/auth/forgot-password` | Request password reset |
-| POST | `/auth/reset-password` | Reset password with token |
-| POST | `/auth/verify-email` | Verify email with token |
-| POST | `/auth/resend-verification` | Resend verification email |
+| POST | `/auth/forgot-password` | `{"email": "..."}`. Sends reset email if account exists. |
+| POST | `/auth/reset-password` | `{"token": "...", "password": "..."}`. Token from reset email link. |
+| POST | `/auth/verify-email` | `{"token": "..."}`. Token from verification email link. |
+| POST | `/auth/resend-verification` | Resend verification email for current user |
 
 ## Wins
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/wins` | Create a win (multipart: `content`, `type`, `visibility`) |
+| POST | `/wins` | Create a win (`content`, `type`, `visibility`) |
 | GET | `/wins/my-wins` | List current user's wins |
 | GET | `/wins/:id` | Get a specific win |
 | PATCH | `/wins/:id` | Update a win (JSON body, any subset of fields) |
@@ -76,9 +79,9 @@ All endpoints (except login/register) require session cookies from login.
 |--------|----------|-------------|
 | GET | `/u/:username` | Get user profile |
 | GET | `/u/:username/stats` | Get user stats |
-| PATCH | `/profile` | Update own profile |
-| POST | `/profile/avatar` | Upload avatar |
-| POST | `/profile/cover` | Upload cover image |
+| PATCH | `/profile` | Update profile. Fields: `username`, `bio` (max 500 chars), `location`, `website` |
+| POST | `/profile/avatar` | Upload avatar (multipart, field name: `avatar`) |
+| POST | `/profile/cover` | Upload cover image (multipart, field name: `cover`, keep under ~1MB) |
 
 ## Feed
 
