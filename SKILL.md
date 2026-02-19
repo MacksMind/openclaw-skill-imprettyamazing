@@ -27,7 +27,7 @@ If auth cookies are missing or expired:
 2. **New account**: Collect username, email, and password → `POST /auth/register`. Remind them to verify their email (or check their inbox and call `POST /auth/verify-email` with the token if email access is available).
 3. **Existing account**: Continue.
 4. Prompt for email and password for this session only, then call `POST /auth/login`.
-5. Save session cookies from login, then persist `access_token`, `refresh_token` (if present), and access-token expiry in TOOLS.md.
+5. Save session cookies from login, then **immediately** persist `access_token`, `refresh_token` (if present), and access-token expiry in TOOLS.md.
 6. If login fails, re-prompt for email/password.
 7. Never persist email/password in TOOLS.md.
 8. Reuse persisted auth cookies until the stored access-token expiry time.
@@ -52,10 +52,33 @@ Cookie-auth endpoints:
 
 For cookie-auth endpoints, follow these steps:
 
+Preflight persistence health check (run before any cookie-auth call):
+
+```bash
+test -n "$IPA_ACCESS_TOKEN" || { echo "Missing Access Token Cookie in TOOLS.md"; exit 1; }
+test -n "$IPA_ACCESS_TOKEN_EXPIRES_AT_UTC" || { echo "Missing Access Token Expires At (UTC) in TOOLS.md"; exit 1; }
+printf '%s' "$IPA_ACCESS_TOKEN_EXPIRES_AT_UTC" | grep -Eq '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$' || { echo "Invalid Access Token Expires At (UTC) format"; exit 1; }
+```
+
 **Step 0 — Reuse persisted auth if still valid (preferred):**
 1. Read persisted `Access Token Cookie` (and `Refresh Token Cookie` if available) from TOOLS.md.
-2. If `Access Token Expires At (UTC)` is in the future, use those cookie values directly for requests.
-3. If missing/expired, continue to Step 1.
+2. Run the preflight persistence health check.
+3. If `Access Token Expires At (UTC)` is in the future, rebuild a cookie jar from those values and use that jar for requests.
+4. If missing/expired, continue to Step 1.
+
+Canonical cookie-jar rebuild snippet (from persisted values):
+
+```bash
+IPA_COOKIE_FILE="/tmp/ipa-cookies-$$.txt"
+
+cat > "$IPA_COOKIE_FILE" <<EOF
+# Netscape HTTP Cookie File
+.imprettyamazing.com	TRUE	/	TRUE	0	access_token	$IPA_ACCESS_TOKEN
+.imprettyamazing.com	TRUE	/	TRUE	0	refresh_token	$IPA_REFRESH_TOKEN
+EOF
+```
+
+If `refresh_token` is unavailable, write only the `access_token` line.
 
 **Step 1 — Login (do this once, before any other calls):**
 ```bash
@@ -69,6 +92,15 @@ curl -s -X POST https://api.imprettyamazing.com/auth/login \
 The `-c` flag saves auth cookies (`access_token` and `refresh_token`) to the cookie file.
 
 After login, extract cookie values and persist them to TOOLS.md with access-token expiry (from JWT `exp`).
+
+Canonical cookie extraction snippet (from curl cookie jar):
+
+```bash
+ACCESS_TOKEN="$(awk '$6=="access_token" {print $7}' "$IPA_COOKIE_FILE" | tail -n 1)"
+REFRESH_TOKEN="$(awk '$6=="refresh_token" {print $7}' "$IPA_COOKIE_FILE" | tail -n 1)"
+
+test -n "$ACCESS_TOKEN" || { echo "Missing access_token in cookie jar"; exit 1; }
+```
 
 Canonical expiry extraction snippet (from `access_token`):
 
@@ -91,6 +123,7 @@ echo "$ACCESS_TOKEN_EXPIRES_AT_UTC"
 ```
 
 Persist `ACCESS_TOKEN_EXPIRES_AT_UTC` as `Access Token Expires At (UTC)` in TOOLS.md.
+Persist `ACCESS_TOKEN` as `Access Token Cookie` and `REFRESH_TOKEN` (if present) as `Refresh Token Cookie`.
 
 **Step 2 — Make API calls (reuse the cookie file):**
 ```bash
@@ -110,7 +143,7 @@ curl -s https://api.imprettyamazing.com/wins/my-wins \
 If any call returns `{"statusCode": 401, ...}`:
 1. Prompt again for email/password (session-only).
 2. Call `POST /auth/login` again and overwrite the cookie file with `-c`.
-3. Update persisted `access_token`, `refresh_token`, and `Access Token Expires At (UTC)` in TOOLS.md.
+3. Re-extract cookies from `IPA_COOKIE_FILE` and update persisted `access_token`, `refresh_token`, and `Access Token Expires At (UTC)` in TOOLS.md.
 4. Retry the failed call.
 
 **Rules:**
