@@ -6,8 +6,21 @@
 ## General
 All endpoints use JSON (`Content-Type: application/json`) except `POST /profile/avatar` and `POST /profile/cover` (multipart form data).
 
+Success responses vary by endpoint (single object, list + pagination, or empty body/status for some deletes).
+
 ## Authentication
-All endpoints (except login/register) require session cookies from login.
+Session-cookie requirements:
+
+- No-login endpoints: `POST /auth/register`, `POST /auth/login`, `POST /auth/forgot-password`, `POST /auth/reset-password`, `POST /auth/verify-email`
+- Cookie-auth endpoints: `POST /auth/resend-verification`, `GET /auth/me`, and all non-auth resource endpoints
+
+For cookie-auth endpoints, login first and send cookies on subsequent requests (for example with curl `-c` on login, `-b` on later calls).
+
+Cookies may include JWT-based token values (for example `access_token`), but auth is passed via cookies.
+
+Client guidance: you may persist cookie token values (`access_token`, optionally `refresh_token`) and reuse them until access-token expiry, then re-login.
+
+Canonical expiry tracking: derive `Access Token Expires At (UTC)` from the `access_token` JWT `exp` claim and refresh auth when expired.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
