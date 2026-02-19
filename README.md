@@ -47,7 +47,6 @@ Read-only smoke checks passed with cookie auth:
 
 Observed in live behavior:
 - Login sets `access_token` / `refresh_token` via `Set-Cookie`.
-- `GET /feed` returned `404` in this environment, while `GET /feed/discover` returned `200`.
 
 ## Updating This Skill
 
