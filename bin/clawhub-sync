@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v rsync >/dev/null 2>&1; then
+  echo "Error: rsync is required" >&2
+  exit 1
+fi
+
+if ! repo_root="$(git rev-parse --show-toplevel 2>/dev/null)"; then
+  echo "Error: not inside a git repository" >&2
+  exit 1
+fi
+
+cd "$repo_root"
+
+dest_dir="$repo_root/clawhub"
+ignore_file="$repo_root/.clawhubignore"
+
+mkdir -p "$dest_dir"
+
+rsync_args=(
+  -a
+  --delete
+  --prune-empty-dirs
+  --exclude=/clawhub/
+  --exclude=/.clawhubignore
+)
+
+if [[ -f "$ignore_file" ]]; then
+  rsync_args+=(--exclude-from="$ignore_file" --delete-excluded)
+fi
+
+rsync "${rsync_args[@]}" "$repo_root/" "$dest_dir/" -v
+
+copied_count="$(find "$dest_dir" -type f | wc -l | tr -d ' ')"
+echo "Synced $copied_count files to $dest_dir"
