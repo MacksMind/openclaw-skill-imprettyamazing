@@ -1,0 +1,121 @@
+# I'm Pretty Amazing API Reference
+
+## Base URL
+`https://api.imprettyamazing.com`
+
+## Authentication
+All endpoints (except login/register) require session cookies from login.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/auth/login` | Login with `{"email", "password"}`. Sets `access_token` and `refresh_token` cookies. |
+| POST | `/auth/register` | Create account |
+| GET | `/auth/me` | Get current user info |
+| POST | `/auth/forgot-password` | Request password reset |
+| POST | `/auth/reset-password` | Reset password with token |
+| POST | `/auth/verify-email` | Verify email with token |
+| POST | `/auth/resend-verification` | Resend verification email |
+
+## Wins
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/wins` | Create a win (multipart: `content`, `type`, `visibility`) |
+| GET | `/wins/my-wins` | List current user's wins |
+| GET | `/wins/:id` | Get a specific win |
+| PATCH | `/wins/:id` | Update a win (JSON body, any subset of fields) |
+| DELETE | `/wins/:id` | Delete a win |
+
+### Win Types
+`PERSONAL`, `PROFESSIONAL`, `HEALTH`, `SOCIAL`, `CREATIVE`, `LEARNING`
+
+### Visibility
+`PUBLIC`, `PRIVATE`
+
+### Win Object Fields
+`id`, `userId`, `content`, `type`, `visibility`, `status`, `imageUrl`, `tags`, `sourceApp`, `sourceAppId`, `summary`, `createdAt`, `updatedAt`, `likeCount`, `commentCount`, `isLiked`
+
+## Comments
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/wins/:id/comments` | List comments on a win |
+| POST | `/wins/:id/comments` | Add a comment (`{"content": "..."}`) |
+| DELETE | `/wins/comments/:commentId` | Delete a comment |
+
+## Likes
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/wins/:id/like` | Like a win |
+| DELETE | `/wins/:id/like` | Unlike a win |
+
+## Social / Follows
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/follows/:userId` | Follow a user |
+| DELETE | `/follows/:userId` | Unfollow a user |
+| GET | `/follows/check/:userId` | Check if following a user |
+| GET | `/follows/following` | List users you follow |
+| GET | `/follows/followers` | List your followers |
+| DELETE | `/follows/followers/:userId` | Remove a follower |
+| GET | `/follows/stats` | Follow/follower counts |
+
+## Blocks
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/blocks` | List blocked users |
+| POST | `/blocks/:userId` | Block a user |
+| DELETE | `/blocks/:userId` | Unblock a user |
+
+## Profiles
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/u/:username` | Get user profile |
+| GET | `/u/:username/stats` | Get user stats |
+| PATCH | `/profile` | Update own profile |
+| POST | `/profile/avatar` | Upload avatar |
+| POST | `/profile/cover` | Upload cover image |
+
+## Feed
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/feed` | Main feed |
+| GET | `/feed/discover` | Discover feed |
+
+## Pagination
+
+List endpoints support pagination via query params:
+
+| Param | Default | Description |
+|-------|---------|-------------|
+| `page` | 1 | Page number |
+| `limit` | 20 | Items per page |
+| `quality` | `all` | Filter (feed endpoints) |
+
+Response includes a `pagination` object: `{ total, page, limit, totalPages }`
+
+Example: `GET /follows/following?page=1&limit=20`
+
+## Feedback
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/feedback` | Submit feedback (JSON, see below) |
+
+Feedback payload:
+```json
+{"category": "BUG|FEATURE_REQUEST|GENERAL", "message": "...", "pageUrl": "...", "pageContext": "..."}
+```
+Message max 1000 characters.
+
+## Known Limits
+
+- Bio: max 500 characters
+- Feedback message: max 1000 characters
+- Cover image: keep file small (under ~1MB, 413 on large uploads)
+- Password: UI requires a symbol, but API does not enforce this (known bug)
