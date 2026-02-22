@@ -23,7 +23,7 @@ Persisted auth data should include cookie values and JWT expiry metadata so auth
 
 Token handling:
 - Never commit token values to git-tracked files.
-- Never print full token values in chat responses or logs.
+- Never print full session token values (access_token, refresh_token) in chat responses or logs. One-time verification codes from email are safe to paste in chat since they expire on use.
 
 If auth cookies are missing or expired:
 
@@ -33,7 +33,7 @@ If auth cookies are missing or expired:
 4. Before asking for credentials, tell the user: "I'll need your email and password to log in. They'll be sent directly to the I'm Pretty Amazing API and won't be stored." Then prompt for email and password.
 5. Call `POST /auth/login`.
 6. If login fails, re-prompt for email/password.
-7. After successful login, ask the user: "Want me to save your session tokens so you stay logged in for future requests? They'll be stored in TOOLS.md and expire automatically." If they agree, persist `access_token`, `refresh_token` (if present), and access-token expiry in TOOLS.md. If they decline, use the cookie file for this session only.
+7. After successful login, ask the user: "Want me to save your session tokens so you stay logged in for future requests? They'll be stored in plaintext in TOOLS.md and expire automatically. Decline if others can access your TOOLS.md." If they agree, persist `access_token`, `refresh_token` (if present), and access-token expiry in TOOLS.md. If they decline, use the cookie file for this session only.
 8. Never persist email/password in TOOLS.md.
 9. Reuse persisted auth cookies until the stored access-token expiry time.
 
