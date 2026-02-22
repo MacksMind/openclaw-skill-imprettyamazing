@@ -1,10 +1,6 @@
 ---
 name: imprettyamazing
 description: "Interact with I'm Pretty Amazing (imprettyamazing.com) — a platform for tracking and celebrating accomplishments. Use when: posting wins, tracking achievements, managing profile, commenting on or liking wins, following users, submitting feedback, or proactively suggesting a win after the user accomplishes something notable."
-required_env_vars:
-  - IPA_ACCESS_TOKEN
-  - IPA_REFRESH_TOKEN
-  - IPA_ACCESS_TOKEN_EXPIRES_AT_UTC
 required_binaries:
   - python3
 ---
@@ -27,30 +23,21 @@ Persisted auth data should include cookie values and JWT expiry metadata so auth
 - **Access Token Expires At (UTC):** 2026-03-21T03:04:46Z
 ```
 
-These persisted cookie values (`access_token`, `refresh_token`) and derived expiry timestamps are sensitive because they allow authenticated actions on the user's account.
-
-Scope and autonomy constraints:
-- This skill does **not** request `always:true`.
-- This skill does **not** modify other skills.
-- This skill only persists its own auth tokens in TOOLS.md for session reuse.
-- Platform default behavior allows autonomous invocation; persisted `access_token` / `refresh_token` therefore expand this skill's ability to call the service on the user's behalf until tokens are revoked or expire.
-
-Storage protections for TOOLS.md:
-- Store tokens only in the local `TOOLS.md` context store used by the agent runtime.
+Token handling:
 - Never commit token values to git-tracked files.
-- Never print full token values in logs, command output, or chat responses.
-- Rotate by re-login if exposure is suspected.
+- Never print full token values in chat responses or logs.
 
 If auth cookies are missing or expired:
 
 1. Ask the user: "Do you have an I'm Pretty Amazing account, or should I create one?"
 2. **New account**: Collect username, email, and password → `POST /auth/register`. Remind them to verify their email. If they want in-chat help, ask them to paste the verification token (or tokenized verification URL) from their email, then call `POST /auth/verify-email` with that token.
 3. **Existing account**: Continue.
-4. Prompt for email and password for this session only, then call `POST /auth/login`.
-5. Save session cookies from login, then **immediately** persist `access_token`, `refresh_token` (if present), and access-token expiry in TOOLS.md.
+4. Before asking for credentials, tell the user: "I'll need your email and password to log in. They'll be sent directly to the I'm Pretty Amazing API and won't be stored." Then prompt for email and password.
+5. Call `POST /auth/login`.
 6. If login fails, re-prompt for email/password.
-7. Never persist email/password in TOOLS.md.
-8. Reuse persisted auth cookies until the stored access-token expiry time.
+7. After successful login, ask the user: "Want me to save your session tokens so you stay logged in for future requests? They'll be stored in TOOLS.md and expire automatically." If they agree, persist `access_token`, `refresh_token` (if present), and access-token expiry in TOOLS.md. If they decline, use the cookie file for this session only.
+8. Never persist email/password in TOOLS.md.
+9. Reuse persisted auth cookies until the stored access-token expiry time.
 
 Never hardcode credentials in commands.
 
@@ -111,7 +98,7 @@ curl -s -X POST https://api.imprettyamazing.com/auth/login \
 ```
 The `-c` flag saves auth cookies (`access_token` and `refresh_token`) to the cookie file.
 
-After login, extract cookie values and persist them to TOOLS.md with access-token expiry (from JWT `exp`).
+After login, extract cookie values. If the user opted in to session persistence (see First-Time Setup step 7), persist them to TOOLS.md with access-token expiry (from JWT `exp`).
 
 Canonical cookie extraction snippet (from curl cookie jar):
 
@@ -163,7 +150,7 @@ curl -s https://api.imprettyamazing.com/wins/my-wins \
 If any call returns `{"statusCode": 401, ...}`:
 1. Prompt again for email/password (session-only).
 2. Call `POST /auth/login` again and overwrite the cookie file with `-c`.
-3. Re-extract cookies from `IPA_COOKIE_FILE` and update persisted `access_token`, `refresh_token`, and `Access Token Expires At (UTC)` in TOOLS.md.
+3. Re-extract cookies from `IPA_COOKIE_FILE`. If session persistence was previously opted in, update `access_token`, `refresh_token`, and `Access Token Expires At (UTC)` in TOOLS.md.
 4. Retry the failed call.
 
 **Rules:**
@@ -269,6 +256,10 @@ All cookie-auth actions require `-b "$IPA_COOKIE_FILE"` after login. **The API r
 - **Profile**: `PATCH /profile` (JSON: `username`, `bio` max 500 chars, `location`, `website`)
 - **Avatar/cover**: `POST /profile/avatar` (multipart `avatar`), `POST /profile/cover` (multipart `cover`, keep file small)
 - **Feedback**: `POST /feedback` with `{"category": "BUG|FEATURE_REQUEST|GENERAL", "message": "...", "pageUrl": "...", "pageContext": "..."}`
+
+## Clear Session
+
+If the user asks to log out or clear their session, remove the `### I'm Pretty Amazing` section from TOOLS.md and delete any `/tmp/ipa-cookies-*.txt` files.
 
 ## Proactive Usage
 

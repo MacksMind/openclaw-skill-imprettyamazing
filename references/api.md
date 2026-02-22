@@ -20,10 +20,6 @@ Cookies may include JWT-based token values (for example `access_token`), but aut
 
 Client guidance: you may persist cookie token values (`access_token`, optionally `refresh_token`) and reuse them until access-token expiry, then re-login.
 
-Skill-scope guidance: this skill does not request `always:true` and does not modify other skills; it only persists its own auth tokens for session reuse.
-
-Risk note: platform default autonomous invocation means persisted `access_token`/`refresh_token` can enable authenticated API calls on the user's behalf until tokens are revoked or expire.
-
 Canonical expiry tracking: derive `Access Token Expires At (UTC)` from the `access_token` JWT `exp` claim and refresh auth when expired.
 
 | Method | Endpoint | Description |
