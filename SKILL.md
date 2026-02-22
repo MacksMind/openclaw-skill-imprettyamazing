@@ -5,6 +5,8 @@ required_env_vars:
   - IPA_ACCESS_TOKEN
   - IPA_REFRESH_TOKEN
   - IPA_ACCESS_TOKEN_EXPIRES_AT_UTC
+required_binaries:
+  - python3
 ---
 
 # I'm Pretty Amazing
@@ -36,7 +38,7 @@ Storage protections for TOOLS.md:
 If auth cookies are missing or expired:
 
 1. Ask the user: "Do you have an I'm Pretty Amazing account, or should I create one?"
-2. **New account**: Collect username, email, and password → `POST /auth/register`. Remind them to verify their email (or check their inbox and call `POST /auth/verify-email` with the token if email access is available).
+2. **New account**: Collect username, email, and password → `POST /auth/register`. Remind them to verify their email. If they want in-chat help, ask them to paste the verification token (or tokenized verification URL) from their email, then call `POST /auth/verify-email` with that token.
 3. **Existing account**: Continue.
 4. Prompt for email and password for this session only, then call `POST /auth/login`.
 5. Save session cookies from login, then **immediately** persist `access_token`, `refresh_token` (if present), and access-token expiry in TOOLS.md.
