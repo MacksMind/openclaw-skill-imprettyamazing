@@ -41,6 +41,8 @@ Notes:
 - Cookies may contain JWTs; expiry is derived from the JWT `exp` claim.
 - Reuse persisted cookie values until `Access Token Expires At (UTC)`.
 - Treat persisted `access_token`/`refresh_token` values as sensitive credentials that permit authenticated actions on behalf of the user.
+- This skill does **not** request `always:true` and does **not** modify other skills; it only persists its own auth tokens for session reuse.
+- Platform default autonomous invocation means persisted tokens can allow service calls on the user's behalf until those tokens are revoked or expired.
 - Never commit token values to repository files, and never print full token values in logs or chat output.
 
 ## Safety Rules

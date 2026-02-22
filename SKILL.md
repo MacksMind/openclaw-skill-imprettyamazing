@@ -29,6 +29,12 @@ Persisted auth data should include cookie values and JWT expiry metadata so auth
 
 These persisted cookie values (`access_token`, `refresh_token`) and derived expiry timestamps are sensitive because they allow authenticated actions on the user's account.
 
+Scope and autonomy constraints:
+- This skill does **not** request `always:true`.
+- This skill does **not** modify other skills.
+- This skill only persists its own auth tokens in TOOLS.md for session reuse.
+- Platform default behavior allows autonomous invocation; persisted `access_token` / `refresh_token` therefore expand this skill's ability to call the service on the user's behalf until tokens are revoked or expire.
+
 Storage protections for TOOLS.md:
 - Store tokens only in the local `TOOLS.md` context store used by the agent runtime.
 - Never commit token values to git-tracked files.
