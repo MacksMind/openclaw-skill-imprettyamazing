@@ -1,6 +1,10 @@
 ---
 name: imprettyamazing
 description: "Interact with I'm Pretty Amazing (imprettyamazing.com) — a platform for tracking and celebrating accomplishments. Use when: posting wins, tracking achievements, managing profile, commenting on or liking wins, following users, submitting feedback, or proactively suggesting a win after the user accomplishes something notable."
+required_env_vars:
+  - IPA_ACCESS_TOKEN
+  - IPA_REFRESH_TOKEN
+  - IPA_ACCESS_TOKEN_EXPIRES_AT_UTC
 ---
 
 # I'm Pretty Amazing
@@ -20,6 +24,14 @@ Persisted auth data should include cookie values and JWT expiry metadata so auth
 - **Refresh Token Cookie:** eyJhbGciOi... (optional but recommended)
 - **Access Token Expires At (UTC):** 2026-03-21T03:04:46Z
 ```
+
+These persisted cookie values (`access_token`, `refresh_token`) and derived expiry timestamps are sensitive because they allow authenticated actions on the user's account.
+
+Storage protections for TOOLS.md:
+- Store tokens only in the local `TOOLS.md` context store used by the agent runtime.
+- Never commit token values to git-tracked files.
+- Never print full token values in logs, command output, or chat responses.
+- Rotate by re-login if exposure is suspected.
 
 If auth cookies are missing or expired:
 

@@ -16,6 +16,14 @@ The skill uses **cookie-based authentication**:
 - Send cookies on authenticated requests with curl `-b`
 - If a request returns `401`, re-login and retry
 
+### Required Environment Variables
+
+Cookie-auth workflows assume the following environment variables are available (typically sourced from persisted values in `TOOLS.md`):
+
+- `IPA_ACCESS_TOKEN`
+- `IPA_REFRESH_TOKEN` (optional for some sessions, but required by declared skill metadata)
+- `IPA_ACCESS_TOKEN_EXPIRES_AT_UTC`
+
 ### Persisted Auth Metadata
 
 To reduce repeated logins, persist auth metadata in `TOOLS.md` under:
@@ -32,6 +40,8 @@ Notes:
 - Do **not** persist email/password.
 - Cookies may contain JWTs; expiry is derived from the JWT `exp` claim.
 - Reuse persisted cookie values until `Access Token Expires At (UTC)`.
+- Treat persisted `access_token`/`refresh_token` values as sensitive credentials that permit authenticated actions on behalf of the user.
+- Never commit token values to repository files, and never print full token values in logs or chat output.
 
 ## Safety Rules
 
