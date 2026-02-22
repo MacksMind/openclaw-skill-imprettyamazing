@@ -1,8 +1,6 @@
 ---
 name: imprettyamazing
 description: "Interact with I'm Pretty Amazing (imprettyamazing.com) — a platform for tracking and celebrating accomplishments. Use when: posting wins, tracking achievements, managing profile, commenting on or liking wins, following users, submitting feedback, or proactively suggesting a win after the user accomplishes something notable."
-required_binaries:
-  - python3
 ---
 
 # I'm Pretty Amazing
@@ -59,33 +57,28 @@ Cookie-auth endpoints:
 
 For cookie-auth endpoints, follow these steps:
 
-Preflight persistence health check (run before any cookie-auth call):
-
-```bash
-test -n "$IPA_ACCESS_TOKEN" || { echo "Missing Access Token Cookie in TOOLS.md"; exit 1; }
-test -n "$IPA_ACCESS_TOKEN_EXPIRES_AT_UTC" || { echo "Missing Access Token Expires At (UTC) in TOOLS.md"; exit 1; }
-printf '%s' "$IPA_ACCESS_TOKEN_EXPIRES_AT_UTC" | grep -Eq '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$' || { echo "Invalid Access Token Expires At (UTC) format"; exit 1; }
-```
-
 **Step 0 — Reuse persisted auth if still valid (preferred):**
 1. Read persisted `Access Token Cookie` (and `Refresh Token Cookie` if available) from TOOLS.md.
-2. Run the preflight persistence health check.
+2. Verify that `Access Token Cookie` is present and `Access Token Expires At (UTC)` is a valid ISO 8601 timestamp (YYYY-MM-DDTHH:MM:SSZ). If either is missing or malformed, continue to Step 1.
 3. If `Access Token Expires At (UTC)` is in the future, rebuild a cookie jar from those values and use that jar for requests.
-4. If missing/expired, continue to Step 1.
+4. If expired, continue to Step 1.
 
-Canonical cookie-jar rebuild snippet (from persisted values):
+Canonical cookie-jar rebuild snippet (substitute persisted values from TOOLS.md):
 
 ```bash
 IPA_COOKIE_FILE="/tmp/ipa-cookies-$$.txt"
 
+ACCESS_TOKEN="<Access Token Cookie from TOOLS.md>"
+REFRESH_TOKEN="<Refresh Token Cookie from TOOLS.md>"
+
 cat > "$IPA_COOKIE_FILE" <<EOF
 # Netscape HTTP Cookie File
-.imprettyamazing.com	TRUE	/	TRUE	0	access_token	$IPA_ACCESS_TOKEN
-.imprettyamazing.com	TRUE	/	TRUE	0	refresh_token	$IPA_REFRESH_TOKEN
+.imprettyamazing.com	TRUE	/	TRUE	0	access_token	$ACCESS_TOKEN
+.imprettyamazing.com	TRUE	/	TRUE	0	refresh_token	$REFRESH_TOKEN
 EOF
 ```
 
-If `refresh_token` is unavailable, write only the `access_token` line.
+If `Refresh Token Cookie` is unavailable, omit the `REFRESH_TOKEN` assignment and the `refresh_token` line.
 
 **Step 1 — Login (do this once, before any other calls):**
 ```bash
@@ -139,11 +132,11 @@ curl -s https://api.imprettyamazing.com/wins/my-wins \
 ```
 Use `-b "$IPA_COOKIE_FILE"` on **every** cookie-auth request.
 
-If only persisted cookie values are available (no cookie file yet), you can call with an explicit cookie header:
+If only persisted cookie values are available (no cookie file yet), you can call with an explicit cookie header (substitute values from TOOLS.md):
 
 ```bash
 curl -s https://api.imprettyamazing.com/wins/my-wins \
-  -H "Cookie: access_token=$IPA_ACCESS_TOKEN; refresh_token=$IPA_REFRESH_TOKEN"
+  -H "Cookie: access_token=<Access Token Cookie from TOOLS.md>; refresh_token=<Refresh Token Cookie from TOOLS.md>"
 ```
 
 **Step 3 — Handle expired sessions:**
