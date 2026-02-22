@@ -187,6 +187,49 @@ curl -s -X POST https://api.imprettyamazing.com/wins \
 # {"statusCode":400,"message":{"message":["content should not be empty"],"error":"Bad Request","statusCode":400}}
 ```
 
+## STAR Format
+
+Wins can optionally include a STAR (Situation, Task, Action, Result) breakdown. Pass a `starFormat` object when creating or updating a win.
+
+**All four fields are required** when `starFormat` is provided — omitting any field returns a 500 error.
+
+```bash
+curl -s -X POST https://api.imprettyamazing.com/wins \
+  -b "$IPA_COOKIE_FILE" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "content": "Your win here",
+    "type": "PROFESSIONAL",
+    "visibility": "PUBLIC",
+    "tags": ["tag1", "tag2"],
+    "starFormat": {
+      "situation": "What was the context or challenge?",
+      "task": "What needed to be done?",
+      "action": "What did you do?",
+      "result": "What was the outcome?"
+    }
+  }'
+```
+
+STAR format can also be added to existing wins via PATCH:
+
+```bash
+curl -s -X PATCH https://api.imprettyamazing.com/wins/:id \
+  -b "$IPA_COOKIE_FILE" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "starFormat": {
+      "situation": "...",
+      "task": "...",
+      "action": "...",
+      "result": "..."
+    }
+  }'
+```
+
+### STAR Format Object Fields
+`id`, `winId`, `situation`, `task`, `action`, `result`, `createdAt`, `updatedAt`
+
 ## Win Types
 
 `PERSONAL`, `PROFESSIONAL`, `HEALTH`, `SOCIAL`, `CREATIVE`, `LEARNING`
