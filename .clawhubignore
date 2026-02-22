@@ -1,6 +1,2 @@
-.git
-.gitignore
 LICENSE
 README.md
-.env
-bin/
