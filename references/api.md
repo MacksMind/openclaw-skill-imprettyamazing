@@ -51,7 +51,7 @@ Canonical expiry tracking: derive `Access Token Expires At (UTC)` from the `acce
 ### Win Object Fields
 `id`, `userId`, `content`, `type`, `visibility`, `status`, `imageUrl`, `tags`, `starFormat`, `sourceApp`, `sourceAppId`, `summary`, `embedding`, `winDate`, `slackMessageId`, `slackChannelId`, `motivosityRecognitionId`, `isMotivosityImported`, `motivosityMetadata`, `createdAt`, `updatedAt`, `likeCount`, `commentCount`, `isLiked`
 
-Note: `winDate` is the explicit date of the win and is independent of `createdAt` — pass it to backdate a win.
+Note: `winDate` is optional; the server defaults it to the current timestamp. Pass it explicitly to backdate a win.
 
 ### STAR Format (optional)
 
