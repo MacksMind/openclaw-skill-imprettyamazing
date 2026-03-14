@@ -51,19 +51,7 @@ Canonical expiry tracking: derive `Access Token Expires At (UTC)` from the `acce
 ### Win Object Fields
 `id`, `userId`, `content`, `type`, `visibility`, `status`, `imageUrl`, `tags`, `starFormat`, `sourceApp`, `sourceAppId`, `summary`, `embedding`, `winDate`, `slackMessageId`, `slackChannelId`, `motivosityRecognitionId`, `isMotivosityImported`, `motivosityMetadata`, `createdAt`, `updatedAt`, `likeCount`, `commentCount`, `isLiked`
 
-#### New Fields (added with Slack/Motivosity integration)
-| Field | Type | Description |
-|-------|------|-------------|
-| `winDate` | ISO 8601 timestamp | Explicit win date, independent of `createdAt`. Allows backdating. |
-| `summary` | string \| null | AI-generated summary of the win. |
-| `embedding` | array \| null | Vector embedding for search/recommendations. |
-| `sourceApp` | string \| null | Name of the app that created the win (e.g. `"slack"`). |
-| `sourceAppId` | string \| null | ID of the win in the source app. |
-| `slackMessageId` | string \| null | Slack message ID for wins imported from Slack. |
-| `slackChannelId` | string \| null | Slack channel ID for wins imported from Slack. |
-| `motivosityRecognitionId` | string \| null | Motivosity recognition ID for imported wins. |
-| `isMotivosityImported` | boolean | Whether the win was imported from Motivosity. |
-| `motivosityMetadata` | object \| null | Raw metadata from Motivosity import. |
+Note: `winDate` is the explicit date of the win and is independent of `createdAt` — pass it to backdate a win.
 
 ### STAR Format (optional)
 
