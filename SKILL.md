@@ -11,8 +11,6 @@ Interact with [imprettyamazing.com](https://imprettyamazing.com) to track accomp
 
 This skill is maintained at [github.com/MacksMind/openclaw-skill-imprettyamazing](https://github.com/MacksMind/openclaw-skill-imprettyamazing) and published to [ClawHub](https://clawhub.ai) as `imprettyamazing`.
 
-To suggest changes or report issues, please [file a PR](https://github.com/MacksMind/openclaw-skill-imprettyamazing/pulls).
-
 ## First-Time Setup
 
 On first use, check TOOLS.md for an `### I'm Pretty Amazing` section.
