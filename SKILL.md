@@ -7,6 +7,10 @@ description: "Interact with I'm Pretty Amazing (imprettyamazing.com) — a platf
 
 Interact with [imprettyamazing.com](https://imprettyamazing.com) to track accomplishments.
 
+## Upstream
+
+This skill is maintained at [github.com/MacksMind/openclaw-skill-imprettyamazing](https://github.com/MacksMind/openclaw-skill-imprettyamazing) and published to [ClawHub](https://clawhub.ai) as `imprettyamazing`.
+
 ## First-Time Setup
 
 On first use, check TOOLS.md for an `### I'm Pretty Amazing` section.
